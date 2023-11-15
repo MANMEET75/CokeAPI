@@ -1,75 +1,103 @@
 # API-CocaCola
-## AWS-CICD-Deployment-with-Github-Actions
 
-## 1. Login to AWS console.
+## How to Deploy Streamlit app on EC2 instance
 
-## 2. Create IAM user for deployment
+### As we need to upload the trained weights to GitHub, we will have to use the following Git Large File Storage (LFS) commands
 
-	#with specific access
+```bash
+git init
+```
+```bash
+git lfs install
+```
+```bash
+git lfs track "*.pt"
+```
+```bash
+git lfs push --all origin main
+```
+```bash
+git add .
+```
+```bash
+git commit -m "large file to github"
+```
+```bash
+git push -u origin main
+```
 
-	1. EC2 access : It is virtual machine
+## 1. Login with your AWS console and launch an EC2 instance
 
-	2. ECR: Elastic Container registry to save your docker image in aws
+## 2. Run the following commands
 
+### Note: Do the port mapping to this port:- 8000
 
-	#Description: About the deployment
+```bash
+sudo apt update
+```
 
-	1. Build docker image of the source code
+```bash
+sudo apt upgrade -y
+```
 
-	2. Push your docker image to ECR
+```bash
+sudo apt-get install curl
+```
+```bash
+cd /tmp
+curl -O https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
+```
+```bash
+bash Anaconda3-2020.11-Linux-x86_64.sh
+```
+```bash
+source ~/anaconda3/bin/activate
+```
+```bash
+conda create -p venv python==3.11 -y
+```
+```bash
+conda activate venv/
+```
+```bash
+sudo apt install git curl unzip tar make sudo vim wget -y
+```
+```bash
+sudo apt-get install git-lfs
+```
+```bash
+git lfs install
+```
 
-	3. Launch Your EC2 
+```bash
+git clone https://github.com/MANMEET75/CokeAPI.git
+```
 
-	4. Pull Your image from ECR in EC2
+```bash
+sudo apt install python3-pip
+```
 
-	5. Lauch your docker image in EC2
+```bash
+pip3 install -r requirements.txt
+```
 
-	#Policy:
+```bash
+sudo apt-get install python3-opencv
+```
 
-	1. AmazonEC2ContainerRegistryFullAccess
+```bash
+conda install opencv
+```
 
-	2. AmazonEC2FullAccess
+```bash
+#Temporary running
+uvicorn main:app --host 0.0.0.0 --reload
+```
 
-	
-## 3. Create ECR repo to store/save docker image
-    - Save the URI: 566373416292.dkr.ecr.ap-south-1.amazonaws.com/mlproj
+```bash
+#Permanent running
+nohup uvicorn main:app --host 0.0.0.0 --reload
+```
 
-	
-## 4. Create EC2 machine (Ubuntu) 
-
-## 5. Open EC2 and Install docker in EC2 Machine:
-	
-	
-	#optinal
-
-	sudo apt-get update -y
-
-	sudo apt-get upgrade
-	
-	#required
-
-	curl -fsSL https://get.docker.com -o get-docker.sh
-
-	sudo sh get-docker.sh
-
-	sudo usermod -aG docker ubuntu
-
-	newgrp docker
-	
-# 6. Configure EC2 as self-hosted runner:
-    setting>actions>runner>new self hosted runner> choose os> then run command one by one
-
-
-# 7. Setup github secrets:
-
-    AWS_ACCESS_KEY_ID=
-
-    AWS_SECRET_ACCESS_KEY=
-
-    AWS_REGION = us-east-1
-
-    AWS_ECR_LOGIN_URI = demo>>  566373416292.dkr.ecr.ap-south-1.amazonaws.com
-
-    ECR_REPOSITORY_NAME = simple-app
-
-Enjoy Coding!
+Note: fastapi runs on this port: 8000
+#### Enjoy Coding!
