@@ -12,25 +12,32 @@ from fastapi import FastAPI, File, UploadFile
 
 # Initialize the models
 pretrained_model = YOLO("pretrained.pt")
-custom_model = YOLO("custom.pt")
-pollutedItems_model = YOLO("polluted.pt")
+custom_model = YOLO("CokeDetectionAI.pt")
+pollutedItems_model = YOLO("best.pt")
 
 
-def is_blurred(image_path):
-    image = cv2.imread(image_path)
-    if image is None:
-        return False  # Unable to read the image
+def is_image_blurred(uploaded_image, threshold=540):
+    try:
+        # Convert BytesIO object to an image
+        pil_image = Image.open(uploaded_image)
+        
+        # Convert to a NumPy array
+        image = np.array(pil_image)
+        
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Compute the Laplacian variance
+        variance = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-    # Calculate the Laplacian variance as a measure of blurriness
-    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+        # Determine if the image is blurred
+        is_blurred = variance < threshold
 
-    # You can adjust this threshold value based on your requirements
-    threshold = 500  # Adjust this value as needed
+        return is_blurred, variance
 
-    return laplacian_var < threshold
+    except Exception as e:
+        # Handle exceptions and raise an error
+        raise ValueError(f"Error processing image: {str(e)}")
 
 
 def get_image_from_bytes(binary_image: bytes) -> Image:
@@ -165,7 +172,7 @@ def detect_custom_model(input_image: Image) -> pd.DataFrame:
         save=False,
         image_size=640,
         augment=False,
-        conf=0.5,
+        conf=0.55,
     )
     return predict
 def detect_pretrained_model(input_image: Image) -> pd.DataFrame:
@@ -205,6 +212,6 @@ def detect_pollutedItems_model(input_image: Image) -> pd.DataFrame:
         save=False,
         image_size=640,
         augment=False,
-        conf=0.70,
+        conf=0.35,
     )
     return predict

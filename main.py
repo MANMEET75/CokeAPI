@@ -253,30 +253,35 @@ async def get_result(file: bytes = File(...)):
     
     return JSONResponse(content=result)
 
-@app.post("/identify_blur_image")
-async def check_blur(file: UploadFile):
-    # Create a temporary file to save the uploaded image
-    with open("temp_image.jpg", "wb") as temp_image:
-        temp_image.write(file.file.read())
+@app.post("/detect_blur_image")
+async def detect_blur_image(file: UploadFile = File(...)):
+    try:
+        # Read the contents of the uploaded file
+        contents = await file.read()
 
-    # Check if the uploaded image is blurred
-    is_blurred_image = is_blurred("temp_image.jpg")
+        # Create a BytesIO object from the file contents
+        uploaded_image = BytesIO(contents)
 
-    # Remove the temporary image file
-    import os
-    os.remove("temp_image.jpg")
+        # Call the is_image_blurred function
+        is_blurred, variance = is_image_blurred(uploaded_image)
 
-    if is_blurred_image:
-        return JSONResponse(content={"message": "Image is blurred"}, status_code=200)
-    else:
-        return JSONResponse(content={"message": "Image is not blurred"}, status_code=200)
+        # Return the result as a response message
+        if is_blurred:
+            return JSONResponse(content={"message": "Image is blurred"})
+        else:
+            return JSONResponse(content={"message": "Image is not blurred"})
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        return HTTPException(status_code=500, detail=str(e))
 
    
 
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", ports=[8000])
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 
