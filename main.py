@@ -16,12 +16,35 @@ from app import get_image_from_bytes
 
 
 
+logger.remove()
+logger.add(
+    sys.stderr,
+    colorize=True,
+    format="<green>{time:HH:mm:ss}</green> | <level>{message}</level>",
+    level=10,
+)
+logger.add("log.log", rotation="1 MB", level="DEBUG", compression="zip")
+
+###################### FastAPI Setup #############################
 
 app = FastAPI(
     title="Coca Cola Inventory Detection",
     version="2023.1.31",
 )
 
+origins = [
+    "http://localhost",
+    "http://localhost:8008",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def save_openapi_json():
@@ -230,23 +253,27 @@ async def get_result(file: bytes = File(...)):
     
     return JSONResponse(content=result)
 
-@app.post("/identify_blur_image")
-async def check_blur(file: UploadFile):
-    # Create a temporary file to save the uploaded image
-    with open("temp_image.jpg", "wb") as temp_image:
-        temp_image.write(file.file.read())
+@app.post("/detect_blur_image")
+async def detect_blur_image(file: UploadFile = File(...)):
+    try:
+        # Read the contents of the uploaded file
+        contents = await file.read()
 
-    # Check if the uploaded image is blurred
-    is_blurred_image = is_blurred("temp_image.jpg")
+        # Create a BytesIO object from the file contents
+        uploaded_image = BytesIO(contents)
 
-    # Remove the temporary image file
-    import os
-    os.remove("temp_image.jpg")
+        # Call the is_image_blurred function
+        is_blurred, variance = is_image_blurred(uploaded_image)
 
-    if is_blurred_image:
-        return JSONResponse(content={"message": "Image is blurred"}, status_code=200)
-    else:
-        return JSONResponse(content={"message": "Image is not blurred"}, status_code=200)
+        # Return the result as a response message
+        if is_blurred:
+            return JSONResponse(content={"message": "Image is blurred"})
+        else:
+            return JSONResponse(content={"message": "Image is not blurred"})
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        return HTTPException(status_code=500, detail=str(e))
 
    
 
