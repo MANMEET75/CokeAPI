@@ -16,35 +16,12 @@ from app import get_image_from_bytes
 
 
 
-logger.remove()
-logger.add(
-    sys.stderr,
-    colorize=True,
-    format="<green>{time:HH:mm:ss}</green> | <level>{message}</level>",
-    level=10,
-)
-logger.add("log.log", rotation="1 MB", level="DEBUG", compression="zip")
-
-###################### FastAPI Setup #############################
 
 app = FastAPI(
     title="Coca Cola Inventory Detection",
     version="2023.1.31",
 )
 
-origins = [
-    "http://localhost",
-    "http://localhost:8008",
-    "*"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.on_event("startup")
 def save_openapi_json():
