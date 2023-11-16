@@ -72,6 +72,9 @@ git lfs install
 ```bash
 git clone https://github.com/MANMEET75/CokeAPI.git
 ```
+```bash
+cd CokeAPI/
+```
 
 ```bash
 sudo apt install python3-pip
