@@ -214,12 +214,12 @@ def img_custom_detection_to_img(file: bytes = File(...)):
 
 @app.post("/get_result")
 async def get_result(file: bytes = File(...)):
-    """Get the number of detected objects using all three object detection models.
+    """Check if the inventory is polluted based on object detection models.
 
     Args:
         file (bytes): The image file in bytes format.
     Returns:
-        JSONResponse: JSON with the number of detected objects for each model.
+        JSONResponse: JSON with a boolean indicating whether the inventory is polluted or not.
     """
     input_image = get_image_from_bytes(file)
     
@@ -235,23 +235,9 @@ async def get_result(file: bytes = File(...)):
     predict_custom = detect_custom_model(input_image)
     num_detected_objects_custom = len(predict_custom)
 
+    is_inventory_polluted = num_detected_objects_polluted > 0 or (num_detected_objects_pretrained - num_detected_objects_custom > 0)
 
-    if num_detected_objects_polluted>0:
-        result="Inventory is polluted"
-    else:
-        difference=num_detected_objects_pretrained-num_detected_objects_custom
-        if difference>0:
-            result="Inventory is polluted"
-        else:
-            result="Inventory is not polluted"
-        
-
-
-    result = {
-        'result': result
-    }
-    
-    return JSONResponse(content=result)
+    return JSONResponse(content=is_inventory_polluted)
 
 @app.post("/detect_blur_image")
 async def detect_blur_image(file: UploadFile = File(...)):
@@ -265,11 +251,14 @@ async def detect_blur_image(file: UploadFile = File(...)):
         # Call the is_image_blurred function
         is_blurred, variance = is_image_blurred(uploaded_image)
 
+
+        
+
         # Return the result as a response message
         if is_blurred:
-            return JSONResponse(content={"message": "Image is blurred"})
+            return JSONResponse(content=True)
         else:
-            return JSONResponse(content={"message": "Image is not blurred"})
+            return JSONResponse(content=False)
 
     except Exception as e:
         # Handle exceptions and return an error response
