@@ -172,7 +172,7 @@ def detect_custom_model(input_image: Image) -> pd.DataFrame:
         save=False,
         image_size=640,
         augment=False,
-        conf=0.55,
+        conf=0.60,
     )
     return predict
 def detect_pretrained_model(input_image: Image) -> pd.DataFrame:
