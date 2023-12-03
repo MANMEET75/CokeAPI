@@ -212,6 +212,8 @@ def detect_pollutedItems_model(input_image: Image) -> pd.DataFrame:
         save=False,
         image_size=640,
         augment=False,
-        conf=0.35,
+        # conf=0.35,
+        conf=0.69,
     )
     return predict
+
