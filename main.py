@@ -239,6 +239,9 @@ async def get_result(file: bytes = File(...)):
 
     return JSONResponse(content=is_inventory_polluted)
 
+
+
+
 @app.post("/detect_blur_image")
 async def detect_blur_image(file: UploadFile = File(...)):
     try:
