@@ -16,7 +16,7 @@ custom_model = YOLO("CokeDetectionAI.pt")
 pollutedItems_model = YOLO("best.pt")
 
 
-def is_image_blurred(uploaded_image, threshold=540):
+def is_image_blurred(uploaded_image, threshold=70):
     try:
         # Convert BytesIO object to an image
         pil_image = Image.open(uploaded_image)
@@ -175,6 +175,7 @@ def detect_custom_model(input_image: Image) -> pd.DataFrame:
         conf=0.60,
     )
     return predict
+
 def detect_pretrained_model(input_image: Image) -> pd.DataFrame:
     """
     Predict from sample_model.
@@ -216,4 +217,3 @@ def detect_pollutedItems_model(input_image: Image) -> pd.DataFrame:
         conf=0.69,
     )
     return predict
-
